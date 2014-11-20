@@ -14,7 +14,7 @@
 				 ]
   :plugins [[lein-cljsbuild "1.0.3"]]
   :cljsbuild {
-    :builds [{:source-paths ["src-cljs"]
+    :builds [{:source-paths ["src/soiltypefinder"]
               :compiler {:output-to "resources/js/main.js"
                          :optimizations :whitespace
                          :pretty-print true}}]}

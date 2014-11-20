@@ -6,10 +6,9 @@
             [dommy.core :as dommy]
             [cljs.core.async :refer [<! put! chan]]
             [ajax.core :refer [GET POST] :as ajax]
-            [cognitect.transit :as t]
-            )
+            [cognitect.transit :as t])
   (:import [goog.net Jsonp]
-           [goog Uri])))
+           [goog Uri]))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -43,30 +42,31 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Get and Process the Data
 
-
 (defn getentryinfo [entry]
   ""
   (let [soil     (get-in entry [:gsx$soil :$t])
         suborder (get-in entry [:gsx$suborder :$t])
         polygons (get-in entry [:gsx$points :$t])]
         (.log js.console (str soil suborder))))
-  
+
 (defn handler [[ok response]]
   (if ok
-    (let [entries (get-in response [:feed :entry])
-         ie   (map getentryinfo entries)]
-       ; (.log js/console (count entries))
-;        (.log js/console (str (first entries)))
-;        (.log js/console (str (second entries)))
-;        (.log js/console (str (nth entries 2)))
-;        (.log js/console (str (get-in (first entries) [:gsx$suborder :$t])))
-;        (map getentryinfo entries)
-       (for [entry entries]
-         (let [soil     (get-in entry [:gsx$suborder :$t])
-               suborder (get-in entry [:gsx$suborder :$t])
-               polygons (get-in entry [:gsx$suborder :$t])]
-           (.log js/console soil)
-           ie )))
+    (let [entries (get-in response [:feed :entry])]
+         ; these will all work showing that entries is seqable
+         ; and that I can access the sub-data of an individual entry
+         (.log js/console (count entries))
+         (.log js/console (str (first entries)))
+         (.log js/console (str (second entries)))
+         (.log js/console (str (nth entries 2)))
+         (.log js/console (str (get-in (first entries) [:gsx$suborder :$t])))
+         ;map does not work
+         (map getentryinfo entries)
+         ; for/let does not work
+         (for [entry entries]
+          (let [soil     (get-in entry [:gsx$suborder :$t])
+                suborder (get-in entry [:gsx$suborder :$t])
+                polygons (get-in entry [:gsx$suborder :$t])]
+            (.log js/console soil))))
     (.error js/console (str response))))
 
 (defn ajax []
@@ -79,4 +79,3 @@
 
 ; Add a listener to the search button
 (dommy/listen! (sel1 :#search) :click ajax)
-
