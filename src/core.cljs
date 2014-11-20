@@ -5,9 +5,9 @@
             [ajax.core :refer [GET POST] :as ajax]))
 
 
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; App State
+;; appstate
+(def latlon (atom {:latitude 0 :longitude 0}))
 (def soils (atom []))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -35,7 +35,9 @@
 
 (def spreadsheetkey "1uqfGchso5Vk6_VjZWKu-eJMFp0gtP9VjN15uco0ZjsE")
 (def worksheetkey "onni5m2")
-(def query1 (baseurl spreadsheetkey worksheetkey (makequery 10 0)))
+
+(defn geturl [lat lon]
+  (baseurl spreadsheetkey worksheetkey (makequery 10 0)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -64,9 +66,9 @@
              (.log js/console (str @soils)))))
     (.error js/console (str response))))
 
-(defn ajax []
+(defn ajax [url]
   (ajax/ajax-request
-     {:uri query1
+     {:uri url
       :method :get
       :handler handler
       :format (ajax/json-request-format)
@@ -83,26 +85,27 @@
 (defn input [label type id]
   (row label [:input.form-control {:field type :id id}]))
 
+(def form-template
+  [:div
+   (input "Latitude" :numeric :latitude)
+   (input "Longitude" :numeric :longitude)])
 
 (defn soilfinderapp
   "main app for the soil type finder"
   []
-
-   [:div
+  [:div#container.container
     [:header#header]
-     (input "Latitude" :number :latitude)
-     (input "Longitude" :number :longitude)
-     [:h1 "todos"]
-      (doall
-       (for [soil @soils]
-         [:div
-          [:h2 (:soil soil)]
-          [:h3 (:suborder soil)]]))
+    [bind-fields form-template latlon]
+    (doall
+     (for [soil @soils]
+       [:div
+        [:h2 (:soil soil)]
+        [:h3 (:suborder soil)]]))
+
      [:button.btn.btn-default
-         {:on-click ajax} "Run"]])
+         {:on-click #(ajax (geturl (get @latlon :latitude) (get @latlon :longitude))) } "Run"]])
 
 ;run
-;(defn ^:export run [] (reagent/render-component [soilfinderapp] (.-body js/document)))
 (defn ^:export run [] (reagent/render-component [soilfinderapp]  (.getElementById js/document "app")))
 
 
