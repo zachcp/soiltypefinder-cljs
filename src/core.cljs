@@ -6,13 +6,15 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; appstate
+;; appstate and spreadsheet info
 (def latlon (atom {:latitude 0 :longitude 0}))
 (def soils (atom []))
 
+(def spreadsheetkey "1uqfGchso5Vk6_VjZWKu-eJMFp0gtP9VjN15uco0ZjsE")
+(def worksheetkey "onni5m2")
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Spreadsheet URL Generation
-
 (defn baseurl
   "define baseurl for searching Google Spreadsheets"
   [sheetkey worksheetId query]
@@ -33,12 +35,11 @@
           minlon "minlon<"]
     (apply str ["?sq="maxlat lat "%20and%20" minlat lat "%20and%20" maxlon lon "%20and%20" minlon lon])))
 
-(def spreadsheetkey "1uqfGchso5Vk6_VjZWKu-eJMFp0gtP9VjN15uco0ZjsE")
-(def worksheetkey "onni5m2")
-
-(defn geturl [lat lon]
-  (baseurl spreadsheetkey worksheetkey (makequery 10 0)))
-
+(defn geturl []
+  "create the url using the latlon atom for locations"
+  (let [url (baseurl spreadsheetkey worksheetkey (makequery (get @latlon :latitude) (get @latlon :longitude)))]
+    (.log js/console (str url))
+    url))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Get and Process the Data
@@ -48,31 +49,25 @@
   [[ok response]]
   (if ok
     (let [entries (get-in response [:feed :entry])]
-         ; these will all work showing that entries is seqable
-         ; and that I can access the sub-data of an individual entry
-         ;(.log js/console (count entries))
          ;(.log js/console (str (first entries)))
-         ;(.log js/console (str (second entries)))
-         ;(.log js/console (str (nth entries 2)))
-         (.log js/console (str (get-in (first entries) [:gsx$suborder :$t])))
-
-       ;for/let does not work
-          (reset! soils [] )
-          (doseq [entry entries]
-            (let [soil     (get-in entry [:gsx$suborder :$t])
-                  suborder (get-in entry [:gsx$suborder :$t])
-                  polygons (get-in entry [:gsx$suborder :$t])]
-                 (swap! soils conj {:soil soil :suborder suborder} )
-             (.log js/console (str @soils)))))
+         ;(.log js/console (str (get-in (first entries) [:gsx$suborder :$t])))
+         (reset! soils [] )
+         (doseq [entry entries]
+           (let [soil     (get-in entry [:gsx$suborder :$t])
+                 suborder (get-in entry [:gsx$suborder :$t])
+                 polygons (get-in entry [:gsx$suborder :$t])]
+             (swap! soils conj {:soil soil :suborder suborder}))))
     (.error js/console (str response))))
 
-(defn ajax [url]
-  (ajax/ajax-request
-     {:uri url
-      :method :get
-      :handler handler
-      :format (ajax/json-request-format)
-      :response-format (ajax/json-response-format {:keywords? true})}))
+(defn ajax []
+  "make the url for lat lon and send the AJAX request"
+  (let [url  (geturl)]
+    (ajax/ajax-request
+       {:uri url
+        :method :get
+        :handler handler
+        :format (ajax/json-request-format)
+        :response-format (ajax/json-response-format {:keywords? true})})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Layout
@@ -103,7 +98,10 @@
         [:h3 (:suborder soil)]]))
 
      [:button.btn.btn-default
-         {:on-click #(ajax (geturl (get @latlon :latitude) (get @latlon :longitude))) } "Run"]])
+         {:on-click #(ajax) } "Run"
+        ; {:on-click #(.log js/console (str (geturl))) } "Run"
+
+      ]])
 
 ;run
 (defn ^:export run [] (reagent/render-component [soilfinderapp]  (.getElementById js/document "app")))
