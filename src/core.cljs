@@ -99,7 +99,6 @@
      [:button.btn.btn-default
          {:on-click #(ajax) } "Run"
         ; {:on-click #(.log js/console (str (geturl))) } "Run"
-
       ]])
 
 ;run
