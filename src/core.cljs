@@ -1,5 +1,4 @@
 (ns soiltypefinder
-  (:use-macros [dommy.macros :only [node sel sel1]])
   (:require [reagent.core :as reagent :refer [atom]]
             [reagent-forms.core :refer [bind-fields init-field value-of]]
             [ajax.core :refer [GET POST] :as ajax]))
@@ -100,7 +99,6 @@
      [:button.btn.btn-default
          {:on-click #(ajax) } "Run"
         ; {:on-click #(.log js/console (str (geturl))) } "Run"
-
       ]])
 
 ;run
