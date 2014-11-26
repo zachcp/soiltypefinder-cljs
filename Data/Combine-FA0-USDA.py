@@ -116,7 +116,8 @@ def write_record(rec):
     """ turn a record into a string for writing """
     l = [ rec['UniqueID'], rec['FAO_USDA'], rec['Soil'], rec['Suborder'],
           rec['maxlat'],   rec['maxlon'],   rec['minlat'], rec['minlon'], rec['Points'] ]
-    return "\t".join(l) + "\n"
+    strings = map(str, l)
+    return "\t".join(strings) + "\n"
     
 def combine():
     # Combine FAO and USDA Data as out.csv
@@ -124,7 +125,7 @@ def combine():
         # add header column
         header = ['UniqueID', 'FAO_USDA', 'Soil', 'Suborder',
                   'maxlat',   'maxlon',   'minlat', 'minlon', 'Points']
-        w.write("\t".join(header)
+        w.write("\t".join(header))
         w.write("\n")
         count = 1
         # add FAO data
@@ -132,9 +133,7 @@ def combine():
             #print source.schema
             for f in source:
                 out = process_FAO(f, count)
-                outvals = map(str, out.values())
-                w.write("\t".join(outvals))
-                w.write("\n")
+                w.write(write_record(out))
                 count += 1
             print "FAO Done"
         # add USDA data
@@ -142,9 +141,7 @@ def combine():
             #print source.schema
             for f in source:
                 out = process_USDA(f, count)
-                outvals = map(str, out.values())
-                w.write("\t".join(outvals))
-                w.write("\n")
+                w.write(write_record(out))
                 count += 1
             print "USDA Done"
 
