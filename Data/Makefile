@@ -1,3 +1,6 @@
+#the python processing script requires fiona installable using the conda package manager:
+# conda install fiona
+
 # Get FAO DATA
 # base url http://worldmap.harvard.edu/data/geonode:DSMW_RdY
 FAO.zip:
@@ -8,7 +11,7 @@ DSMW_RdY.shp: FAO.zip
 	
 # Get USDA DATA
 USDA.zip:
-	curl -o USDA.zip ftp://ftp-fc.sc.egov.usda.gov/NHQ/pub/outgoing/soils/global_soil_suborders_data.zi
+	curl -o USDA.zip ftp://ftp-fc.sc.egov.usda.gov/NHQ/pub/outgoing/soils/global_soil_suborders_data.zip
 global_suborders_2006.shp: USDA.zip
 	unzip USDA.zip
 	touch global_suborders_2006.shp
@@ -18,7 +21,7 @@ combined.tsv: global_suborders_2006.shp DSMW_RdY.shp
 	python Combine-FA0-USDA.py
 	touch combined.tsv
 
-all: combined.tsv
+all: combined.tsv, clean
 	
 clean:
 	rm *.shp
@@ -26,4 +29,5 @@ clean:
 	rm *.shx
 	rm *.cst
 	rm *.prj
-	rm wfsrequest.txt 	
+	rm wfsrequest.txt 
+	rm global_suborders_2006.shp.xml	
