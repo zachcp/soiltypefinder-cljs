@@ -114,8 +114,9 @@ def process_FAO(x, num):
 
 def write_record(rec):
     """ turn a record into a string for writing """
+    points =  str(rec['Points']).replace("(","[").replace(")","]")
     l = [ rec['UniqueID'], rec['FAO_USDA'], rec['Soil'], rec['Suborder'],
-          rec['maxlat'],   rec['maxlon'],   rec['minlat'], rec['minlon'], rec['Points'] ]
+          rec['maxlat'],   rec['maxlon'],   rec['minlat'], rec['minlon'], points ]
     strings = map(str, l)
     return "\t".join(strings) + "\n"
     
