@@ -119,7 +119,42 @@ def write_record(rec):
           rec['maxlat'],   rec['maxlon'],   rec['minlat'], rec['minlon'], points ]
     strings = map(str, l)
     return "\t".join(strings) + "\n"
-    
+
+def write_FAO():
+    with open('FAO.tsv','w') as w:
+        # add header column
+        header = ['UniqueID', 'FAO_USDA', 'Soil', 'Suborder',
+                  'maxlat',   'maxlon',   'minlat', 'minlon', 'Points']
+        w.write("\t".join(header))
+        w.write("\n")
+        count = 1
+        # add FAO data
+        with fiona.open(FAO_shp,'r') as source:
+            #print source.schema
+            for f in source:
+                out = process_FAO(f, count)
+                w.write(write_record(out))
+                count += 1
+            print "FAO Done"
+
+def write_USDA():
+    with open('USDA.tsv','w') as w:
+        # add header column
+        header = ['UniqueID', 'FAO_USDA', 'Soil', 'Suborder',
+                  'maxlat',   'maxlon',   'minlat', 'minlon', 'Points']
+        w.write("\t".join(header))
+        w.write("\n")
+        count = 1
+        # add FAO data
+        with fiona.open(USDA_shp,'r') as source:
+            #print source.schema
+            for f in source:
+                out = process_USDA(f, count)
+                w.write(write_record(out))
+                count += 1
+            print "USDA Done"
+
+
 def combine():
     # Combine FAO and USDA Data as out.csv
     with open('combined.tsv','w') as w:
@@ -130,7 +165,7 @@ def combine():
         w.write("\n")
         count = 1
         # add FAO data
-        with fiona.open(FAO_shp,'r') as source:
+        with fiona.open(USDA_shp,'r') as source:
             #print source.schema
             for f in source:
                 out = process_FAO(f, count)
@@ -147,5 +182,7 @@ def combine():
             print "USDA Done"
 
 if __name__ == "__main__":
-    combine()
+    #combine()
+    #write_FAO()
+    write_USDA()
 
