@@ -21,7 +21,7 @@ combined.tsv: global_suborders_2006.shp DSMW_RdY.shp
 	python Combine-FA0-USDA.py
 	touch combined.tsv
 
-all: combined.tsv, clean
+all: combined.tsv clean
 	
 clean:
 	rm *.shp

@@ -165,7 +165,7 @@ def combine():
         w.write("\n")
         count = 1
         # add FAO data
-        with fiona.open(USDA_shp,'r') as source:
+        with fiona.open(FAO_shp,'r') as source:
             #print source.schema
             for f in source:
                 out = process_FAO(f, count)
@@ -182,7 +182,7 @@ def combine():
             print "USDA Done"
 
 if __name__ == "__main__":
-    #combine()
+    combine()
     #write_FAO()
-    write_USDA()
+    #write_USDA()
 
